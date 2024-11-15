@@ -144,22 +144,22 @@ function scoreTrial($trial, $params, &$debugInfo, $userLat, $userLng, $maxDistan
             $mutation = trim($mutation);
             if (!empty($mutation)) {
                 $debugInfo[] = "Checking mutation: $mutation";
-                if (safeCheck($trial, 'Query2-V1', $mutation)) {
+                if (safeCheck($trial, 'Query2-FUA8', $mutation)) {
                     $score += $weights['mutationMatchWeight'];
                     $details[] = "Mutation is Required to Participate ($mutation): " . formatScore($weights['mutationMatchWeight']);
                 }
-                if (safeCheck($trial, 'Query1-V1', $mutation)) {
+                if (safeCheck($trial, 'Query1-FUA8', $mutation)) {
                     $score += $weights['mutationMentioned'];
                     $details[] = "Mutation is Specifically Mentioned ($mutation): " . formatScore($weights['mutationMentioned']);
                 }
-                if (safeCheck($trial, 'Query3-V1', $mutation)) {
+                if (safeCheck($trial, 'Query3-FUA8', $mutation)) {
                     $score += $weights['mutationMentionedTitle'];
                     $details[] = "Mutation is Specifically Mentioned in the Title/Brief ($mutation): " . formatScore($weights['mutationMentionedTitle']);
                     $debugInfo[] = "Found mutation '$mutation' in title/brief: " . $trial['BriefTitle'];
                 } else {
                     $debugInfo[] = "Did not find mutation '$mutation' in title/brief: " . $trial['BriefTitle'];
                 }
-                if (safeCheck($trial, 'Query4-V1', $mutation)) {
+                if (safeCheck($trial, 'Query4-FUA8', $mutation)) {
                     $score += $weights['MutationNotAllowed'];
                     $details[] = "Mutation is Not Allowed in Trial ($mutation): " . formatScore($weights['MutationNotAllowed']);
                 }
@@ -173,23 +173,23 @@ function scoreTrial($trial, $params, &$debugInfo, $userLat, $userLng, $maxDistan
         foreach ($biomarkers as $biomarker) {
             $biomarker = trim($biomarker);
             if (!empty($biomarker)) {
-                if (safeCheck($trial, 'Query6-V1', $biomarker)) {
+                if (safeCheck($trial, 'Query6-FUA8', $biomarker)) {
                     $score += $weights['biomarkerRequiredWeight'];
                     $details[] = "Biomarker is Required to participate ($biomarker): " . formatScore($weights['biomarkerRequiredWeight']);
                 }
-                if (safeCheck($trial, 'Query7-V1', $biomarker)) {
+                if (safeCheck($trial, 'Query7-FUA8', $biomarker)) {
                     $score += $weights['biomarkerMentioned'];
                     $details[] = "Biomarker is Specifically Mentioned ($biomarker): " . formatScore($weights['biomarkerMentioned']);
                 }
-                if (safeCheck($trial, 'Query8-V1', $biomarker)) {
+                if (safeCheck($trial, 'Query8-FUA8', $biomarker)) {
                     $score += $weights['biomarkerMentionedTitle'];
                     $details[] = "Biomarker is Specifically Mentioned in the Title/Brief ($biomarker): " . formatScore($weights['biomarkerMentionedTitle']);
                 }
-                if (safeCheck($trial, 'Query9-V1', $biomarker)) {
+                if (safeCheck($trial, 'Query9-FUA8', $biomarker)) {
                     $score += $weights['biomarkerNotAllowed'];
                     $details[] = "Biomarker is Not Allowed to participate ($biomarker): " . formatScore($weights['biomarkerNotAllowed']);
                 }
-                if (safeCheck($trial, 'Query9-V1', $biomarker)) {
+                if (safeCheck($trial, 'Query9-FUA8', $biomarker)) {
                     $score += $weights['biomarkerProgressionRequired'];
                     $details[] = "Biomarker requires previous treatment to participate ($biomarker): " . formatScore($weights['biomarkerProgressionRequired']);
                 }
@@ -198,8 +198,8 @@ function scoreTrial($trial, $params, &$debugInfo, $userLat, $userLng, $maxDistan
     }
 
     // Previous Surgery
-    if (isset($params['previousSurgery']) && isset($trial['Query16-V1'])) {
-        $requiredSurgery = stripos($trial['Query16-V1'], "yes") !== false;
+    if (isset($params['previousSurgery']) && isset($trial['Query16-FUA8'])) {
+        $requiredSurgery = stripos($trial['Query16-FUA8'], "yes") !== false;
         $hasSurgery = stripos($params['previousSurgery'], "yes") !== false;
         
         if ($requiredSurgery) {
@@ -217,8 +217,8 @@ function scoreTrial($trial, $params, &$debugInfo, $userLat, $userLng, $maxDistan
 
     // Brain Metastases
     if (isset($params['brainMetastases'])) {
-        if (isset($trial['Query17-V1'])) {
-            $requireBrainMetastases = stripos($trial['Query17-V1'], "yes") !== false;
+        if (isset($trial['Query17-FUA8'])) {
+            $requireBrainMetastases = stripos($trial['Query17-FUA8'], "yes") !== false;
             $hasbrainMetastases = stripos($params['brainMetastases'], "yes") !== false;
         
             if ($requireBrainMetastases) {
@@ -232,8 +232,8 @@ function scoreTrial($trial, $params, &$debugInfo, $userLat, $userLng, $maxDistan
             }
         }
         
-        if (isset($trial['Query18-V1'])) {
-            $titleBrainMetastases = stripos($trial['Query18-V1'], "yes") !== false;
+        if (isset($trial['Query18-FUA8'])) {
+            $titleBrainMetastases = stripos($trial['Query18-FUA8'], "yes") !== false;
             $hasbrainMetastases = stripos($params['brainMetastases'], "yes") !== false;
         
             if ($titleBrainMetastases) {
@@ -246,8 +246,8 @@ function scoreTrial($trial, $params, &$debugInfo, $userLat, $userLng, $maxDistan
                 }
             }
         }
-        if (isset($trial['Query19-V1'])) {
-            $titleBrainMetastases = stripos($trial['Query19-V1'], "yes") !== false;
+        if (isset($trial['Query19-FUA8'])) {
+            $titleBrainMetastases = stripos($trial['Query19-FUA8'], "yes") !== false;
             $hasbrainMetastases = stripos($params['brainMetastases'], "yes") !== false;
         
             if ($titleBrainMetastases) {
@@ -265,9 +265,9 @@ function scoreTrial($trial, $params, &$debugInfo, $userLat, $userLng, $maxDistan
     }
 
     // Cancer Stage Matching Logic
-    if (isset($params['cancerStage']) && isset($trial['Query20-V1'])) {
+    if (isset($params['cancerStage']) && isset($trial['Query20-FUA8'])) {
         $inputStage = trim($params['cancerStage']);
-        $trialStages = strtolower($trial['Query20-V1']);
+        $trialStages = strtolower($trial['Query20-FUA8']);
 
         // Debug information
         $debugInfo[] = "Input Cancer Stage: Stage " . $inputStage;
@@ -288,11 +288,11 @@ function scoreTrial($trial, $params, &$debugInfo, $userLat, $userLng, $maxDistan
         foreach ($priorDrugs as $priorDrug) {
             $priorDrug = trim($priorDrug); // Trim each drug to remove whitespace
             if (!empty($priorDrug)) { // Check if drug is not empty
-                if (safeCheck($trial, 'Query25-V1', $priorDrug) || safeCheck($trial, 'Query26-V1', $priorDrug)) {
+                if (safeCheck($trial, 'Query25-FUA8', $priorDrug) || safeCheck($trial, 'Query26-FUA8', $priorDrug)) {
                     $score += $weights['drugNotAllowedWeight'];
                     $details[] = "Prior drug use is not allowed to participate in Trial ($priorDrug): " . formatScore($weights['drugNotAllowedWeight']);
                 }
-                if (safeCheck($trial, 'Query12-V1', $priorDrug)) {
+                if (safeCheck($trial, 'Query12-FUA8', $priorDrug)) {
                     $score += $weights['drugRequiredWeight'];
                     $details[] = "Prior drug use is required to participate in Trial ($priorDrug): " . formatScore($weights['drugRequiredWeight']);
                 }
@@ -301,8 +301,8 @@ function scoreTrial($trial, $params, &$debugInfo, $userLat, $userLng, $maxDistan
     }
 
     // Metastatic Cancer
-    if (isset($params['metastaticCancer']) && isset($trial['Query23-V1'])) {
-        $requireMetastaticCancer = stripos($trial['Query23-V1'], "yes") !== false;
+    if (isset($params['metastaticCancer']) && isset($trial['Query23-FUA8'])) {
+        $requireMetastaticCancer = stripos($trial['Query23-FUA8'], "yes") !== false;
         $hasMetastaticCancer = stripos($params['metastaticCancer'], "yes") !== false;
     
         if ($requireMetastaticCancer) {
@@ -319,8 +319,8 @@ function scoreTrial($trial, $params, &$debugInfo, $userLat, $userLng, $maxDistan
     }
 
     // PD-1/PD-L1 Progression
-    if (isset($params['progressedPDL1']) && isset($trial['Query27-R1'])) {
-        $requirePDL1Progression = stripos($trial['Query27-R1'], "yes") !== false;
+    if (isset($params['progressedPDL1']) && isset($trial['Query27-FUA8'])) {
+        $requirePDL1Progression = stripos($trial['Query27-FUA8'], "yes") !== false;
         $hasProgressedPDL1 = stripos($params['progressedPDL1'], "yes") !== false;
     
         if ($requirePDL1Progression) {
@@ -342,8 +342,8 @@ function scoreTrial($trial, $params, &$debugInfo, $userLat, $userLng, $maxDistan
         foreach ($resistances as $resistance) {
             $resistance = trim($resistance);
             if (!empty($resistance)) {
-                // Check for required resistances (Query31-V1)
-                if (safeCheck($trial, 'Query31-V1', $resistance)) {
+                // Check for required resistances (Query31-FUA8)
+                if (safeCheck($trial, 'Query31-FUA8', $resistance)) {
                     $score += $weights['resistanceRequiredMatchWeight'];
                     $details[] = "Specific resistance required and matched ($resistance): " . formatScore($weights['resistanceRequiredMatchWeight']);
                 } else {
@@ -351,8 +351,8 @@ function scoreTrial($trial, $params, &$debugInfo, $userLat, $userLng, $maxDistan
                     $details[] = "Specific resistance required but not matched ($resistance): " . formatScore($weights['resistanceRequiredMismatchWeight']);
                 }
                 
-                // Check for sought resistances (Query30-V1)
-                if (safeCheck($trial, 'Query30-V1', $resistance)) {
+                // Check for sought resistances (Query30-FUA8)
+                if (safeCheck($trial, 'Query30-FUA8', $resistance)) {
                     $score += $weights['resistanceSoughtMatchWeight'];
                     $details[] = "Specific resistance sought and matched ($resistance): " . formatScore($weights['resistanceSoughtMatchWeight']);
                 }
@@ -365,8 +365,8 @@ function scoreTrial($trial, $params, &$debugInfo, $userLat, $userLng, $maxDistan
         $priorDrugs = explode(',', $params['priorDrugProgression']);
         $patientDrugs = array_map('trim', $priorDrugs);
 
-        // Check for required drug progression (Query33-V1)
-        $requiredDrugs = explode(',', $trial['Query33-V1']);
+        // Check for required drug progression (Query33-FUA8)
+        $requiredDrugs = explode(',', $trial['Query33-FUA8']);
         $requiredDrugs = array_map('trim', $requiredDrugs);
 
         foreach ($requiredDrugs as $requiredDrug) {
@@ -381,10 +381,10 @@ function scoreTrial($trial, $params, &$debugInfo, $userLat, $userLng, $maxDistan
             }
         }
         
-        // Check for drug progression if taken (Query32-V1 and Query34-V1)
+        // Check for drug progression if taken (Query32-FUA8 and Query34-FUA8)
         $soughtDrugs = array_merge(
-            explode(',', $trial['Query32-V1']),
-            explode(',', $trial['Query34-V1'])
+            explode(',', $trial['Query32-FUA8']),
+            explode(',', $trial['Query34-FUA8'])
         );
         $soughtDrugs = array_map('trim', $soughtDrugs);
 
@@ -399,8 +399,8 @@ function scoreTrial($trial, $params, &$debugInfo, $userLat, $userLng, $maxDistan
     }
 
     // Treatment-Naive Patient
-    if (isset($params['treatmentNaive']) && isset($trial['Query35-V1'])) {
-        $requireTreatmentNaive = stripos($trial['Query35-V1'], "yes") !== false;
+    if (isset($params['treatmentNaive']) && isset($trial['Query35-FUA8'])) {
+        $requireTreatmentNaive = stripos($trial['Query35-FUA8'], "yes") !== false;
         $isTreatmentNaive = stripos($params['treatmentNaive'], "yes") !== false;
 
         if ($requireTreatmentNaive) {
@@ -636,11 +636,11 @@ function getCachedOptions($forceRegenerate = false) {
     }
 
     $options = [
-        'mutations' => consolidateSynonyms(getCommonOptions($trials, 'Query2-V1')),
-        'biomarkers' => consolidateSynonyms(getCommonOptions($trials, 'Query6-V1')),
-        'specificResistances' => consolidateSynonyms(getCommonOptions($trials, 'Query31-V1')),
-        'priorDrugProgression' => consolidateSynonyms(getCommonOptions($trials, 'Query33-V1')),
-        'priorDrugs' => consolidateSynonyms(getCommonOptions($trials, 'Query25-V1'))
+        'mutations' => consolidateSynonyms(getCommonOptions($trials, 'Query2-FUA8')),
+        'biomarkers' => consolidateSynonyms(getCommonOptions($trials, 'Query6-FUA8')),
+        'specificResistances' => consolidateSynonyms(getCommonOptions($trials, 'Query31-FUA8')),
+        'priorDrugProgression' => consolidateSynonyms(getCommonOptions($trials, 'Query33-FUA8')),
+        'priorDrugs' => consolidateSynonyms(getCommonOptions($trials, 'Query25-FUA8'))
     ];
 
     $jsonOptions = json_encode($options);
