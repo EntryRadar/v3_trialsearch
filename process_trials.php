@@ -234,15 +234,18 @@ function scoreTrial($trial, $params, &$debugInfo, $userLat, $userLng, $maxDistan
         
         if (isset($trial['Query18-FUA8'])) {
             $titleBrainMetastases = stripos($trial['Query18-FUA8'], "yes") !== false;
-            $hasbrainMetastases = stripos($params['brainMetastases'], "yes") !== false;
-        
-            if ($titleBrainMetastases) {
-                if ($hasbrainMetastases) {
-                    $score += $weights['titlebrainMetastasesMatchWeight'];
-                    $details[] = "Trial Focuses on Brain Metastases: " . formatScore($weights['titlebrainMetastasesMatchWeight']);
-                } else {
-                    $score += $weights['titlebrainMetastasesMismatchWeight'];
-                    $details[] = "Trial Focuses on Brain Metastases (But May or May Not Be Required): " . formatScore($weights['titlebrainMetastasesMismatchWeight']);
+            // Only proceed if brainMetastases parameter is set and not empty
+            if (isset($params['brainMetastases']) && !empty($params['brainMetastases'])) {
+                $hasbrainMetastases = stripos($params['brainMetastases'], "yes") !== false;
+            
+                if ($titleBrainMetastases) {
+                    if ($hasbrainMetastases) {
+                        $score += $weights['titlebrainMetastasesMatchWeight'];
+                        $details[] = "Trial Focuses on Brain Metastases: " . formatScore($weights['titlebrainMetastasesMatchWeight']);
+                    } else {
+                        $score += $weights['titlebrainMetastasesMismatchWeight'];
+                        $details[] = "Trial Focuses on Brain Metastases (But May or May Not Be Required): " . formatScore($weights['titlebrainMetastasesMismatchWeight']);
+                    }
                 }
             }
         }
@@ -681,7 +684,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $params = array_merge([
             'mutations' => '',
             'biomarkers' => '',
-            'previousSurgery' => '',
+            'previousSurgery' => '2',
             'brainMetastases' => '',
             'cancerStage' => '',
             'metastaticCancer' => '',
