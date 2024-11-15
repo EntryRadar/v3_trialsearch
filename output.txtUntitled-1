@@ -1,0 +1,28 @@
+root@localhost:/srv/users/boisedwellings/apps/boisedwellings/public/trialsearchv2/v2# 
+root@localhost:/srv/users/boisedwellings/apps/boisedwellings/public/trialsearchv2/v2# npm run build
+
+> v2@0.1.0 build
+> next build
+
+  ▲ Next.js 14.2.16
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+ ✓ Linting and checking validity of types    
+ ✓ Collecting page data    
+ ✓ Generating static pages (5/5)
+ ✓ Collecting build traces    
+ ✓ Finalizing page optimization    
+
+Route (app)                              Size     First Load JS
+┌ ○ /                                    97 kB           184 kB
+└ ○ /_not-found                          873 B            88 kB
++ First Load JS shared by all            87.1 kB
+  ├ chunks/117-e468b289a3846595.js       31.6 kB
+  ├ chunks/fd9d1056-bb381e317a39a605.js  53.6 kB
+  └ other shared chunks (total)          1.92 kB
+
+
+○  (Static)  prerendered as static content
+
+root@localhost:/srv/users/boisedwellings/apps/boisedwellings/public/trialsearchv2/v2# 

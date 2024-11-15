@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Clinical Trials Finder</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC6CbbxJcQ60AnpSxzCLgAqT9uOihh-Izk&libraries=places"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <link href="https://cdn.jsdelivr.net/npm/nouislider@15.7.1/dist/nouislider.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/nouislider@15.7.1/dist/nouislider.min.js"></script>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+            color: #343a40;
+        }
+        #searchForm {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        #searchForm div {
+            margin-bottom: 15px;
+        }
+
+        #searchForm label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        #searchForm input[type="text"],
+        #searchForm input[type="number"],
+        #searchForm select {
+            width: calc(100% - 30px);
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            box-sizing: border-box;
+            display: inline-block;
+            font-size: 16px;
+        }
+
+        #searchForm .radio-group {
+            display: flex;
+            gap: 15px;
+        }
+
+        #searchForm .radio-group label {
+            font-weight: normal;
+            font-size: 16px;
+        }
+
+        #searchForm button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background-color 0.3s ease;
+        }
+
+        #searchForm button:hover {
+            background-color: #0056b3;
+        }
+
+        #results > div {
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+            transition: 0.3s;
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        #results a {
+            font-size: 20px;
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        #results p {
+            margin: 10px 0;
+        }
+        #results ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        #results ul li {
+            background-color: #e9ecef;
+            margin-bottom: 5px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .equals {
+        font-weight: bold;
+        display: inline-block;
+        margin: 0 5px;
+        position: relative;
+    }
+    .equals::before, .equals::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        width: 4px;
+        height: 2px;
+        background-color: #000;
+    }
+    .equals::before {
+        left: -5px;
+    }
+    .equals::after {
+        right: -5px;
+    }
+    .fas.fa-long-arrow-alt-right {
+        margin: 0 3px;
+    }
+    .collapsible {
+        cursor: pointer;
+        transition: transform 0.3s ease;
+        margin-bottom: 5px;
+        color: #007bff;
+        margin-left: 5px;
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    .collapsible.rotated {
+        transform: rotate(180deg) translateY(-50%);
+    }
+    .collapsible-content {
+        display: none;
+        padding: 10px;
+        background-color: #ffffff;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        box-shadow: 0 2px 4px 0 rgba(0,0,0,0.1);
+        border: 1px solid #e9ecef;
+    }
+    .collapsible-content label,
+    .collapsible-content input {
+        display: block;
+        margin-bottom: 5px;
+    }
+    .collapsible-content input {
+        margin-left: 20px;
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+        padding: 0.375rem 0.75rem;
+    }
+
+    .pac-container {
+        z-index: 10000; /* Ensure the autocomplete results are on top */
+    }
+
+    .expandable-options {
+        display: none;
+        position: absolute;
+        background-color: #ffffff;
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        padding: 10px;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 1000;
+        width: 100%;
+    }
+
+    .expandable-options label {
+        display: block;
+        margin-bottom: 5px;
+        cursor: pointer;
+    }
+
+    .expandable-options label:hover {
+        background-color: #f8f9fa;
+    }
+
+    .expandable-options input[type="checkbox"] {
+        margin-right: 5px;
+    }
+
+    .input-wrapper {
+        position: relative;
+        margin-bottom: 15px;
+    }
+
+    @media (max-width: 768px) {
+        #searchForm {
+            padding: 10px;
+        }
+    }
+
+    /* Loading spinner */
+    .loading-spinner {
+        display: none;
+        width: 50px;
+        height: 50px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #007bff;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 20px auto;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Skeleton loading for results */
+    .skeleton {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+        border-radius: 4px;
+        height: 20px;
+        margin-bottom: 10px;
+    }
+
+    @keyframes loading {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+
+    /* Modern card styling */
+    .trial-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin-bottom: 20px;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .trial-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Modern form styling */
+    #searchForm input[type="text"],
+    #searchForm input[type="number"],
+    #searchForm select {
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    #searchForm input[type="text"]:focus,
+    #searchForm input[type="number"]:focus,
+    #searchForm select:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+        outline: none;
+    }
+
+    /* Modern button styling */
+    #searchForm button {
+        background: linear-gradient(45deg, #007bff, #0056b3);
+        transition: transform 0.2s;
+    }
+
+    #searchForm button:hover {
+        transform: translateY(-1px);
+        background: linear-gradient(45deg, #0056b3, #004094);
+    }
+
+    #searchForm button:active {
+        transform: translateY(0);
+    }
+
+    .scroll-top-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: #007bff;
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: none;
+        cursor: pointer;
+        opacity: 0;
+        transition: opacity 0.3s, transform 0.3s;
+        transform: translateY(100px);
+    }
+
+    .scroll-top-btn.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    </style>
+    <script>
+    // Enable or disable debug mode
+    const debugMode = true; // Set to false to disable debugging
+
+    function debugLog(message) {
+        if (debugMode) {
+            console.log(message);
+        }
+    }
+
+    function initializeAutocomplete() {
+        var input = document.getElementById('userLocation');
+        var options = {
+            types: ['(cities)'],
+            componentRestrictions: {country: 'us'}
+        };
+
+        var autocomplete = new google.maps.places.Autocomplete(input, options);
+
+        autocomplete.addListener('place_changed', function() {
+            var place = autocomplete.getPlace();
+            if (!place.geometry) {
+                console.log("No details available for input: '" + place.name + "'");
+                return;
+            }
+            
+            // Extract zip code from place details
+            var zipCode = '';
+            for (var i = 0; i < place.address_components.length; i++) {
+                var addressType = place.address_components[i].types[0];
+                if (addressType === "postal_code") {
+                    zipCode = place.address_components[i].short_name;
+                    break;
+                }
+            }
+            
+            if (zipCode) {
+                $('#userLocation').val(zipCode);
+            } else {
+                console.log("No zip code found for the selected place.");
+            }
+        });
+    }
+
+    $(document).ready(function() {
+        initializeAutocomplete();
+        populateOptions();
+
+        $('#searchForm').submit(function(e) {
+            e.preventDefault();
+            fetchTrials();
+            $('html, body').animate({
+                scrollTop: $('#results').offset().top - 20
+            }, 800);
+        });
+
+        // Close options when clicking outside
+        $(document).on('click', function(event) {
+            if (!$(event.target).closest('.input-wrapper').length) {
+                $('.expandable-options').hide();
+            }
+        });
+
+        // Add ripple effect to buttons
+        $('.btn').on('click', function(e) {
+            let x = e.clientX - e.target.offsetLeft;
+            let y = e.clientY - e.target.offsetTop;
+            
+            let ripple = document.createElement('span');
+            ripple.style.left = `${x}px`;
+            ripple.style.top = `${y}px`;
+            
+            this.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 600);
+        });
+
+        // Initialize Select2 on your inputs
+        $('#mutations, #biomarkers, #priorDrugs').select2({
+            tags: true,
+            tokenSeparators: [',', ' '],
+            placeholder: 'Click to see options'
+        });
+
+        // Initialize tooltips
+        tippy('[data-tippy-content]', {
+            placement: 'top',
+            arrow: true,
+            theme: 'light'
+        });
+
+        // Initialize slider for max distance
+        const slider = document.getElementById('maxDistance');
+        noUiSlider.create(slider, {
+            start: [50],
+            connect: 'lower',
+            range: {
+                'min': 0,
+                'max': 500
+            }
+        });
+    });
+
+    function fetchTrials() {
+        var userLocation = $('#userLocation').val();
+        var maxDistance = parseFloat($('#maxDistance').val());
+        var params = {
+            userLocation: userLocation,
+            maxDistance: maxDistance,
+            //Fields
+            mutations: $('#mutations').val(),
+            biomarkers: $('#biomarkers').val(),
+            priorDrugs: $('#priorDrugs').val(),
+            //YesNo Checkbox
+            previousSurgery: $('input[name="previousSurgery"]:checked').val(),
+            //YesNo Checkbox
+            brainMetastases: $('input[name="brainMetastases"]:checked').val(),  
+            
+            // Weights
+            mutationMatchWeight: $('#mutationMatchWeight').val(),
+            mutationMentionedTitle: $('#mutationMentionedTitle').val(),
+            MutationNotAllowed: $('#MutationNotAllowed').val(),
+            mutationMentioned: $('#mutationMentioned').val(),
+            mutationMismatchWeight: $('#mutationMismatchWeight').val(),
+            surgeryMatchWeight: $('#surgeryMatchWeight').val(),
+            surgeryMismatchWeight: $('#surgeryMismatchWeight').val(),
+            biomarkerRequiredWeight: $('#biomarkerRequiredWeight').val(),
+            biomarkerRequiredMismatchWeight: $('#biomarkerRequiredMismatchWeight').val(),
+            biomarkerNotAllowed: $('#biomarkerNotAllowed').val(),
+            biomarkerMentioned: $('#biomarkerMentioned').val(),  
+            
+            brainMetastasesMatchWeight: $('#brainMetastasesMatchWeight').val(),
+            brainMetastasesMismatchWeight: $('#brainMetastasesMismatchWeight').val(),  
+            titlebrainMetastasesMatchWeight: $('#titlebrainMetastasesMatchWeight').val(),
+            titlebrainMetastasesMismatchWeight: $('#titlebrainMetastasesMismatchWeight').val(),  
+                
+            drugRequiredWeight: $('#drugRequiredWeight').val(),
+            drugNotAllowedWeight: $('#drugNotAllowedWeight').val(),
+            notAllowedbrainMetastasesMatchWeight: $('#notAllowedbrainMetastasesMatchWeight').val(),
+            cancerStage: $('input[name="cancerStage"]:checked').val(),
+            cancerStageMatchWeight: $('#cancerStageMatchWeight').val(),
+            metastaticCancer: $('input[name="metastaticCancer"]:checked').val(),
+            metastaticCancerMatchWeight: $('#metastaticCancerMatchWeight').val(),
+            metastaticCancerMismatchWeight: $('#metastaticCancerMismatchWeight').val(),
+
+            progressedPDL1: $('input[name="progressedPDL1"]:checked').val(),
+            pdl1ProgressionMatchWeight: $('#pdl1ProgressionMatchWeight').val(),
+            pdl1ProgressionMismatchWeight: $('#pdl1ProgressionMismatchWeight').val(),
+
+            specificResistances: $('#specificResistances').val(),
+            resistanceRequiredMatchWeight: $('#resistanceRequiredMatchWeight').val(),
+            resistanceRequiredMismatchWeight: $('#resistanceRequiredMismatchWeight').val(),
+            resistanceSoughtMatchWeight: $('#resistanceSoughtMatchWeight').val(),
+
+            priorDrugProgression: $('#priorDrugProgression').val(),
+            drugProgressionRequiredMatchWeight: $('#drugProgressionRequiredMatchWeight').val(),
+            drugProgressionRequiredMismatchWeight: $('#drugProgressionRequiredMismatchWeight').val(),
+            drugProgressionSoughtMatchWeight: $('#drugProgressionSoughtMatchWeight').val(),
+
+            treatmentNaive: $('input[name="treatmentNaive"]:checked').val(),
+            treatmentNaiveRequiredMatchWeight: $('#treatmentNaiveRequiredMatchWeight').val(),
+            treatmentNaiveRequiredMismatchWeight: $('#treatmentNaiveRequiredMismatchWeight').val(),
+
+        };
+        debugLog("Fetching trials with parameters:");
+        debugLog(params);
+
+        Swal.fire({
+            title: 'Searching...',
+            html: 'Finding matching clinical trials',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        $.get('process_trials.php', params, function(response) {
+            $('#results').empty();
+            console.log("Debug Information:", response.debug);
+
+            if (response.trials.length === 0) {
+                debugLog("No trials found.");
+                $('#results').append('<p>No trials found.</p>');
+            } else {
+                response.trials.forEach(function(trial) {
+                    var link = 'https://classic.clinicaltrials.gov/ct2/show/' + trial.NCTId;
+                    var trialDiv = $('<div class="trial-card animate__animated animate__fadeIn"></div>');
+                    trialDiv.append('<a href="' + link + '">' + trial.BriefTitle + '</a>');
+                    trialDiv.append('<p>' + trial.BriefSummary + '</p>');
+                    trialDiv.append('<p>Score: ' + trial.Score + '</p>');
+                    trialDiv.append('<p>Enrollment: ' + trial.EnrollmentCount + '</p>');
+                    
+                    // Only display distance if a location was provided
+                    if (userLocation) {
+                        trialDiv.append('<p>Distance: ' + trial.Distance.toFixed(2) + ' miles</p>');
+                        trialDiv.append('<p>Zip codes within range: ' + trial.WithinRangeZips.join(", ") + '</p>');
+                    }
+
+                    // Display Enrollment Change if present and is a number
+                    if (trial.EnrollmentChange && !isNaN(parseFloat(trial.EnrollmentChange)) && isFinite(trial.EnrollmentChange)) {
+        
+                        var enrollmentChangeColor = parseInt(trial.EnrollmentChange) > 0 ? 'green' : 'red';
+                        var enrollmentChangeIcon = parseInt(trial.EnrollmentChange) > 0 ? '<i class="fas fa-arrow-up"></i>' : '<i class="fas fa-arrow-down"></i>';
+                        var enrollmentChangeText = `<span style="color: ${enrollmentChangeColor};">${enrollmentChangeIcon} ${Math.abs(trial.EnrollmentChange)}</span>`;
+                        trialDiv.append(`<p>Enrollment Change: ${trial.FirstPostEnrollment} <i class="fas fa-long-arrow-alt-right"></i> ${trial.CurrentEnrollment} ${enrollmentChangeText}</p>`);
+                    }
+
+                    // Create a list to display the scoring details
+                    var detailsList = $('<ul></ul>');
+                    trial.ScoringDetails.forEach(function(detail) {
+                        detailsList.append('<li>' + detail + '</li>');
+                    });
+                    trialDiv.append(detailsList);
+
+                    $('#results').append(trialDiv);
+                    debugLog("Processing trial:");
+                    debugLog(trial);
+                });
+            }
+
+            // Display debug information
+            var debugOutput = response.debug.join("\n");
+            $('#debugOutput').text(debugOutput);
+
+            // Populate options
+            populateOptions(response.options);
+        }, 'json').fail(function(jqXHR, textStatus, errorThrown) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Failed to fetch trials. Please try again.'
+            });
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.collapsible').forEach(function(icon) {
+            icon.addEventListener('click', function() {
+                const content = this.nextElementSibling;
+                content.style.display = content.style.display === 'none' ? 'block' : 'none';
+                this.classList.toggle('rotated'); // Rotate the arrow icon
+            });
+        });
+    });
+
+    function toggleOptions(input) {
+        var optionsDiv = input.nextElementSibling;
+        var allOptionsDivs = document.querySelectorAll('.expandable-options');
+        
+        allOptionsDivs.forEach(div => {
+            if (div !== optionsDiv) {
+                div.style.display = 'none';
+            }
+        });
+
+        optionsDiv.style.display = optionsDiv.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function updateInputFromCheckboxes(input) {
+        var optionsDiv = input.nextElementSibling;
+        var checkboxes = optionsDiv.querySelectorAll('input[type="checkbox"]:checked');
+        var values = Array.from(checkboxes).map(cb => cb.value);
+        input.value = values.join(', ');
+    }
+
+    function populateOptions() {
+        $.get('process_trials.php', { action: 'getOptions' }, function(response) {
+            var options = response.options;
+            var synonyms = response.synonyms;
+            var fields = ['mutations', 'biomarkers', 'specificResistances', 'priorDrugProgression', 'priorDrugs'];
+            fields.forEach(field => {
+                var input = document.getElementById(field);
+                var optionsDiv = document.getElementById(field + 'Options');
+                optionsDiv.innerHTML = '';
+                
+                // Sort options by frequency (assuming options are in [term, frequency] format)
+                var sortedOptions = options[field].sort((a, b) => b[1] - a[1]);
+
+                sortedOptions.forEach(([option, frequency]) => {
+                    var isMainTerm = synonyms[field] && Object.keys(synonyms[field]).includes(option);
+                    var displayOption = option + (isMainTerm ? ' (Main Term)' : '');
+
+                    var checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.id = field + '_' + option;
+                    checkbox.value = option;
+                    checkbox.dataset.synonyms = synonyms[field] && synonyms[field][option] ? synonyms[field][option].join(',') : '';
+                    checkbox.addEventListener('change', () => updateInputFromCheckboxes(input));
+
+                    var label = document.createElement('label');
+                    label.htmlFor = checkbox.id;
+                    label.appendChild(checkbox);
+                    label.appendChild(document.createTextNode(`${displayOption} (${frequency})`));
+
+                    if (isMainTerm) {
+                        label.style.fontWeight = 'bold';
+                    }
+
+                    optionsDiv.appendChild(label);
+                });
+
+                input.addEventListener('click', () => toggleOptions(input));
+            });
+
+            // Close options when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!event.target.matches('.input-wrapper input, .expandable-options, .expandable-options *')) {
+                    document.querySelectorAll('.expandable-options').forEach(div => {
+                        div.style.display = 'none';
+                    });
+                }
+            });
+        });
+    }
+
+    $(window).scroll(function() {
+        if ($(this).scrollTop() > 300) {
+            $('#scrollTop').addClass('visible');
+        } else {
+            $('#scrollTop').removeClass('visible');
+        }
+    });
+
+    $('#scrollTop').click(function() {
+        $('html, body').animate({scrollTop: 0}, 800);
+    });
+
+    </script>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body>
+    <form id="searchForm" method="GET" action="process_trials.php">
+        <div>
+            <label for="userLocation">Your Location:</label>
+            <input type="text" id="userLocation" name="userLocation" placeholder="Enter ZIP code">
+        </div>
+        <div>
+            <label for="maxDistance">Max Distance (miles):</label>
+            <input type="number" id="maxDistance" name="maxDistance" placeholder="Enter distance">
+        </div>
+        <div class="input-wrapper">
+            <label for="priorDrugs">Prior Drug Treatments:</label>
+            <input type="text" id="priorDrugs" name="priorDrugs" placeholder="Click to see options">
+            <div id="priorDrugsOptions" class="expandable-options"></div>
+            <i class="fas fa-chevron-down collapsible"></i>
+            <div class="collapsible-content" style="display:none;">
+                <div>
+                    <label>Drug Required Weight:</label>
+                    <input type="number" id="drugRequiredWeight" name="drugRequiredWeight" value="10">
+                </div>
+                <div>
+                    <label>Drug Not Allowed Weight:</label>
+                    <input type="number" id="drugNotAllowedWeight" name="drugNotAllowedWeight" value="-10">
+                </div>
+            </div>
+        </div>
+        <div class="input-wrapper">
+            <label for="mutations">Mutations:</label>
+            <input type="text" id="mutations" name="mutations" placeholder="Click to see options">
+            <div id="mutationsOptions" class="expandable-options"></div>
+            <i class="fas fa-chevron-down collapsible"></i>
+            <div class="collapsible-content" style="display:none;">
+                <div>
+                    <label>Mutation Required Match Weight:</label>
+                    <input type="number" id="mutationMatchWeight" name="mutationMatchWeight" value="8">
+                </div>
+                <div>
+                    <label>Mutation Required Mismatch Weight:</label>
+                    <input type="number" id="mutationMismatchWeight" name="mutationMismatchWeight" value="-5">
+                </div>
+                <div>
+                    <label>Mutation Not Allowed Weight:</label>
+                    <input type="number" id="MutationNotAllowed" name="MutationNotAllowed" value="-8">
+                </div>
+                <div>
+                    <label>Mutation Mentioned Weight:</label>
+                    <input type="number" id="mutationMentioned" name="mutationMentioned" value="3">
+                </div>
+                <div>
+                    <label>Mutation Mentioned in Title/Brief Weight:</label>
+                    <input type="number" id="mutationMentionedTitle" name="mutationMentionedTitle" value="3">
+                </div>
+            </div>
+        </div>
+        <div class="input-wrapper">
+            <label for="biomarkers">Biomarkers:</label>
+            <input type="text" id="biomarkers" name="biomarkers" placeholder="Click to see options">
+            <div id="biomarkersOptions" class="expandable-options"></div>
+            <i class="fas fa-chevron-down collapsible"></i>
+            <div class="collapsible-content" style="display:none;">
+                <div>
+                    <label>Biomarker Required Weight:</label>
+                    <input type="number" id="biomarkerRequiredWeight" name="biomarkerRequiredWeight" value="5">
+                </div>
+                <div>
+                    <label>Biomarker Required Mismatch Weight:</label>
+                    <input type="number" id="biomarkerRequiredMismatchWeight" name="biomarkerRequiredMismatchWeight" value="-5">
+                </div>
+                <div>
+                    <label>Biomarker Not Allowed Weight:</label>
+                    <input type="number" id="biomarkerNotAllowed" name="biomarkerNotAllowed" value="-12">
+                </div>
+                <div>
+                    <label>Biomarker Mentioned Weight:</label>
+                    <input type="number" id="biomarkerMentioned" name="biomarkerMentioned" value="3">
+                </div>
+                <div>
+                    <label>Biomarker Treatment Required:</label>
+                    <input type="number" id="biomarkerProgressionRequired" name="biomarkerProgressionRequired" value="3">
+                </div>
+            </div>
+        </div>
+        <div>
+            <label>Previous Surgery:</label>
+            <div class="radio-group">
+                <label><input type="radio" name="previousSurgery" value="Yes"> Yes</label>
+                <label><input type="radio" name="previousSurgery" value="No"> No</label>
+            </div>
+            <i class="fas fa-chevron-down collapsible"></i>
+            <div class="collapsible-content" style="display:none;">
+                <div>
+                    <label>Surgery Required Weight:</label>
+                    <input type="number" id="surgeryMatchWeight" name="surgeryMatchWeight" value="5">
+                </div>
+                <div>
+                    <label>Surgery Required Mismatch Weight:</label>
+                    <input type="number" id="surgeryMismatchWeight" name="surgeryMismatchWeight" value="-10">
+                </div>
+            </div>
+        </div>
+        <div>
+            <label>Brain Metastases Status:</label>
+            <div class="radio-group">
+                <label><input type="radio" name="brainMetastases" value="Yes"> Yes</label>
+                <label><input type="radio" name="brainMetastases" value="No"> No</label>
+            </div>
+            <i class="fas fa-chevron-down collapsible"></i>
+            <div class="collapsible-content" style="display:none;">
+                <div>
+                    <label>Brain Metastases Not Allowed Match Weight:</label>
+                    <input type="number" id="notAllowedbrainMetastasesMatchWeight" name="notAllowedbrainMetastasesMatchWeight" value="-12">
+                </div>
+                <div>
+                    <label>Brain Metastases Required Weight:</label>
+                    <input type="number" id="brainMetastasesMatchWeight" name="brainMetastasesMatchWeight" value="5">
+                </div>
+                <div>
+                    <label>Brain Metastases Required Mismatch Weight:</label>
+                    <input type="number" id="brainMetastasesMismatchWeight" name="brainMetastasesMismatchWeight" value="-10">
+                </div>
+                <div>
+                    <label>Trail Focuses on Brain Metastases Match:</label>
+                    <input type="number" id="titlebrainMetastasesMatchWeight" name="titlebrainMetastasesMatchWeight" value="5">
+                </div>
+                <div>
+                    <label>Trail Focuses on Brain Metastases Mismatch:</label>
+                    <input type="number" id="titlebrainMetastasesMismatchWeight" name="titlebrainMetastasesMismatchWeight" value="-10">
+                </div>
+
+            </div>
+        </div>
+        <div>
+            <label>Cancer Stage:</label>
+            <div class="radio-group">
+                <label><input type="radio" name="cancerStage" value="1"> 1</label>
+                <label><input type="radio" name="cancerStage" value="2"> 2</label>
+                <label><input type="radio" name="cancerStage" value="3"> 3</label>
+                <label><input type="radio" name="cancerStage" value="4"> 4</label>
+            </div>
+            <i class="fas fa-chevron-down collapsible"></i>
+            <div class="collapsible-content" style="display:none;">
+                <div>
+                    <label>Cancer Stage Match Weight:</label>
+                    <input type="number" id="cancerStageMatchWeight" name="cancerStageMatchWeight" value="5">
+                </div>
+            </div>
+        </div>
+        <div>
+            <label>Metastatic Cancer:</label>
+            <div class="radio-group">
+                <label><input type="radio" name="metastaticCancer" value="Yes"> Yes</label>
+                <label><input type="radio" name="metastaticCancer" value="No"> No</label>
+            </div>
+            <i class="fas fa-chevron-down collapsible"></i>
+            <div class="collapsible-content" style="display:none;">
+                <div>
+                    <label>Metastatic Cancer Required Match Weight:</label>
+                    <input type="number" id="metastaticCancerMatchWeight" name="metastaticCancerMatchWeight" value="10">
+                </div>
+                <div>
+                    <label>Metastatic Cancer Required Mismatch Weight:</label>
+                    <input type="number" id="metastaticCancerMismatchWeight" name="metastaticCancerMismatchWeight" value="-10">
+                </div>
+            </div>
+        </div>
+        <div>
+            <label>Progressed on PD-1/PD-L1 Treatment:</label>
+            <div class="radio-group">
+                <label><input type="radio" name="progressedPDL1" value="Yes"> Yes</label>
+                <label><input type="radio" name="progressedPDL1" value="No"> No</label>
+            </div>
+            <i class="fas fa-chevron-down collapsible"></i>
+            <div class="collapsible-content" style="display:none;">
+                <div>
+                    <label>PD-1/PD-L1 Progression Required Match Weight:</label>
+                    <input type="number" id="pdl1ProgressionMatchWeight" name="pdl1ProgressionMatchWeight" value="10">
+                </div>
+                <div>
+                    <label>PD-1/PD-L1 Progression Required Mismatch Weight:</label>
+                    <input type="number" id="pdl1ProgressionMismatchWeight" name="pdl1ProgressionMismatchWeight" value="-10">
+                </div>
+            </div>
+        </div>
+        <div class="input-wrapper">
+            <label for="specificResistances">Specific Resistances:</label>
+            <input type="text" id="specificResistances" name="specificResistances" placeholder="Click to see options">
+            <div id="specificResistancesOptions" class="expandable-options"></div>
+            <i class="fas fa-chevron-down collapsible"></i>
+            <div class="collapsible-content" style="display:none;">
+                <div>
+                    <label>Resistance Required Match Weight:</label>
+                    <input type="number" id="resistanceRequiredMatchWeight" name="resistanceRequiredMatchWeight" value="10">
+                </div>
+                <div>
+                    <label>Resistance Required Mismatch Weight:</label>
+                    <input type="number" id="resistanceRequiredMismatchWeight" name="resistanceRequiredMismatchWeight" value="-5">
+                </div>
+                <div>
+                    <label>Resistance Sought Match Weight:</label>
+                    <input type="number" id="resistanceSoughtMatchWeight" name="resistanceSoughtMatchWeight" value="5">
+                </div>
+            </div>
+        </div>
+        <div class="input-wrapper">
+            <label for="priorDrugProgression">Prior Drug Progression:</label>
+            <input type="text" id="priorDrugProgression" name="priorDrugProgression" placeholder="Click to see options">
+            <div id="priorDrugProgressionOptions" class="expandable-options"></div>
+            <i class="fas fa-chevron-down collapsible"></i>
+            <div class="collapsible-content" style="display:none;">
+                <div>
+                    <label>Drug Progression Required Match Weight:</label>
+                    <input type="number" id="drugProgressionRequiredMatchWeight" name="drugProgressionRequiredMatchWeight" value="10">
+                </div>
+                <div>
+                    <label>Drug Progression Required Mismatch Weight:</label>
+                    <input type="number" id="drugProgressionRequiredMismatchWeight" name="drugProgressionRequiredMismatchWeight" value="-5">
+                </div>
+                <div>
+                    <label>Drug Progression Sought Match Weight:</label>
+                    <input type="number" id="drugProgressionSoughtMatchWeight" name="drugProgressionSoughtMatchWeight" value="5">
+                </div>
+            </div>
+        </div>
+        <div>
+            <label>Treatment-Naive Patient:</label>
+            <div class="radio-group">
+                <label><input type="radio" name="treatmentNaive" value="Yes"> Yes</label>
+                <label><input type="radio" name="treatmentNaive" value="No"> No</label>
+            </div>
+            <i class="fas fa-chevron-down collapsible"></i>
+            <div class="collapsible-content" style="display:none;">
+                <div>
+                    <label>Treatment-Naive Required Match Weight:</label>
+                    <input type="number" id="treatmentNaiveRequiredMatchWeight" name="treatmentNaiveRequiredMatchWeight" value="10">
+                </div>
+                <div>
+                    <label>Treatment-Naive Required Mismatch Weight:</label>
+                    <input type="number" id="treatmentNaiveRequiredMismatchWeight" name="treatmentNaiveRequiredMismatchWeight" value="-10">
+                </div>
+            </div>
+        </div>
+
+        <button type="submit">Search</button>
+    </form>
+    <div id="results"></div>    
+    <!-- Debug information -->
+    <div id="debugInfo" style="margin-top: 20px; padding: 10px; background-color: #f0f0f0; border: 1px solid #ccc;">
+        <h3>Debug Information:</h3>
+        <pre id="debugOutput"></pre>
+    </div>
+    <button id="scrollTop" class="scroll-top-btn">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+</body>
+</html>
+
+
+
+
+

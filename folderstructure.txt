@@ -1,0 +1,35 @@
+root@localhost:/srv/users/boisedwellings/apps/boisedwellings/public/trialsearchv2# tree -L 1
+.
+├── package-lock.json
+└── v2
+
+1 directory, 1 file
+root@localhost:/srv/users/boisedwellings/apps/boisedwellings/public/trialsearchv2# cd v2
+root@localhost:/srv/users/boisedwellings/apps/boisedwellings/public/trialsearchv2/v2# tree -L 1
+.
+├── app
+├── components
+├── components.json
+├── lib
+├── next.config.mjs
+├── next-env.d.ts
+├── node_modules
+├── package.json
+├── package-lock.json
+├── postcss.config.mjs
+├── README.md
+├── tailwind.config.ts
+└── tsconfig.json
+
+4 directories, 9 files
+root@localhost:/srv/users/boisedwellings/apps/boisedwellings/public/trialsearchv2/v2# cd components
+root@localhost:/srv/users/boisedwellings/apps/boisedwellings/public/trialsearchv2/v2/components# tree -L 1
+.
+├── indexv2-zip-2-18.html
+├── process_trials.php
+├── search-form.tsx
+├── ui
+└── v3.csv
+
+1 directory, 4 files
+root@localhost:/srv/users/boisedwellings/apps/boisedwellings/public/trialsearchv2/v2/components# 
