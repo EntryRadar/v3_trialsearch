@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "buildcp": "npm run build && cp -r out/* ."
   },
   "dependencies": {
     "@headlessui/react": "^2.2.0",
