@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  basePath: '/trialsearchv2/v2_backup',
+  basePath: '/trialsearchv2/v3_trialsearch',
   output: 'export',
   images: {
     unoptimized: true
